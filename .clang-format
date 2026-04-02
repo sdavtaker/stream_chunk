@@ -1,0 +1,16 @@
+---
+# LLVM coding style
+BasedOnStyle: LLVM
+IndentWidth: 4
+ColumnLimit: 100
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+BreakBeforeBraces: Attach
+SpaceBeforeParens: ControlStatements
+PointerAlignment: Left
+ReferenceAlignment: Left
+AlignConsecutiveDeclarations: false
+AlignConsecutiveAssignments: false
+SortIncludes: CaseInsensitive
+...
