@@ -20,6 +20,12 @@ function(enable_coverage target)
         return()
     endif()
 
+    # INTERFACE libraries have no compiled sources; skip silently.
+    get_target_property(_target_type ${target} TYPE)
+    if(_target_type STREQUAL "INTERFACE_LIBRARY")
+        return()
+    endif()
+
     target_compile_options(${target} PRIVATE --coverage -O0 -g)
     target_link_options(${target} PRIVATE --coverage)
 endfunction()
@@ -40,6 +46,8 @@ function(add_coverage_target)
     set(LINE_THRESHOLD   90)
     set(BRANCH_THRESHOLD 85)
 
+    # VERBATIM prevents CMake / Ninja from shell-expanding glob patterns such
+    # as "*/include/stream_chunk/*.hpp" before they reach lcov.
     add_custom_target(coverage_report
         COMMENT "Generating coverage report (line >= ${LINE_THRESHOLD}%, branch >= ${BRANCH_THRESHOLD}%)"
 
@@ -52,18 +60,22 @@ function(add_coverage_target)
         # Run tests
         COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
 
-        # Capture coverage data
+        # Capture coverage data (including branch coverage)
         COMMAND ${LCOV_PATH}
             --capture
+            --branch-coverage
             --directory ${CMAKE_BINARY_DIR}
             --output-file ${COVERAGE_INFO}
 
-        # Remove system / third-party headers
+        # Extract only our library headers; apply branch/brace/trivial filters to
+        # remove compiler-generated branches (e.g. exception handlers) and other
+        # noise that cannot be meaningfully tested.
         COMMAND ${LCOV_PATH}
-            --remove ${COVERAGE_INFO}
-            "/usr/*"
-            "${CMAKE_BINARY_DIR}/_deps/*"
-            "${CMAKE_SOURCE_DIR}/tests/*"
+            --extract ${COVERAGE_INFO}
+            "*/include/stream_chunk/*.hpp"
+            --branch-coverage
+            --filter branch,brace,blank,trivial
+            --ignore-errors unused
             --output-file ${COVERAGE_CLEAN}
 
         # Generate HTML report
@@ -89,5 +101,6 @@ function(add_coverage_target)
             -P ${CMAKE_SOURCE_DIR}/cmake/check_coverage_threshold.cmake
 
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        VERBATIM
     )
 endfunction()

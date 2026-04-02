@@ -8,7 +8,7 @@ workflow.
 
 ## Project overview
 
-`stream_chunk` is a header + source C++23 library that exposes a
+`stream_chunk` is a **header-only** C++23 library that exposes a
 `std::ostream`-compatible interface for writing to a *sequence* of files.
 Each file is capped at a configurable byte-size limit; a new file is opened
 transparently once the limit is reached.
@@ -31,6 +31,10 @@ stream_chunk/
 ├── README.md                    # End-user documentation
 ├── AGENTS.md                    # This file
 │
+├── .github/
+│   └── workflows/
+│       └── ci.yml               # GitHub Actions CI (ubuntu-latest)
+│
 ├── cmake/
 │   ├── coverage.cmake           # Coverage helper functions & targets
 │   ├── check_coverage_threshold.cmake  # CMake script: assert coverage %
@@ -38,13 +42,10 @@ stream_chunk/
 │
 ├── include/
 │   └── stream_chunk/
-│       └── stream_chunk.hpp     # Public API (SPDX: BSD-2-Clause)
-│
-├── src/
-│   └── stream_chunk.cpp         # Implementation
+│       └── stream_chunk.hpp     # Full API + inline implementation (SPDX: BSD-2-Clause)
 │
 └── tests/
-    ├── CMakeLists.txt           # Test target (Catch2)
+    ├── CMakeLists.txt           # Test target (Catch2); coverage instrumentation here
     └── test_stream_chunk.cpp    # Unit tests
 ```
 
@@ -55,9 +56,11 @@ stream_chunk/
 | Concern | Decision |
 |---------|----------|
 | Language standard | C++23 |
+| Library type | Header-only (INTERFACE CMake target) |
 | Build system | CMake ≥ 3.25 |
 | Dependency management | vcpkg (manifest mode) |
 | Test framework | Catch2 v3 |
+| CI platform | GitHub Actions (ubuntu-latest) |
 | Code style | LLVM (clang-format) |
 | Static analysis | clang-tidy (warnings-as-errors) |
 | Coverage thresholds | Lines ≥ 90 %, Branches ≥ 85 % |
@@ -125,11 +128,11 @@ The target fails if line coverage < 90 % or branch coverage < 85 %.
 ```bash
 # Check (CI mode)
 clang-format --dry-run --Werror \
-    $(find include src tests -name '*.hpp' -o -name '*.cpp')
+    $(find include tests -name '*.hpp' -o -name '*.cpp')
 
 # Fix in-place
 clang-format -i \
-    $(find include src tests -name '*.hpp' -o -name '*.cpp')
+    $(find include tests -name '*.hpp' -o -name '*.cpp')
 ```
 
 clang-tidy is configured in `.clang-tidy` and can be enabled at configure
@@ -137,14 +140,16 @@ time with `-DENABLE_CLANG_TIDY=ON`.
 
 ---
 
-## Adding new source files
+## Adding new headers
 
-1. Add the `.cpp` file to `src/`.
-2. Register it in the `add_library(stream_chunk …)` call in `CMakeLists.txt`.
-3. Add any new public header to `include/stream_chunk/` with the SPDX header:
+Because the library is header-only, all code lives in `include/stream_chunk/`.
+
+1. Add the new `.hpp` file to `include/stream_chunk/` with the SPDX header:
    ```cpp
    // SPDX-License-Identifier: BSD-2-Clause
    // Copyright (c) 2026, Damian Vicino
    ```
-4. Write corresponding tests in `tests/test_stream_chunk.cpp` (or a new
+2. Write corresponding tests in `tests/test_stream_chunk.cpp` (or a new
    `tests/test_<feature>.cpp` registered in `tests/CMakeLists.txt`).
+3. No changes to `CMakeLists.txt` are needed; INTERFACE libraries expose
+   the entire `include/` directory automatically.

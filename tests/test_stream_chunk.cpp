@@ -163,3 +163,35 @@ TEST_CASE("ChunkedFileStream – single-byte chunk size", "[ChunkedFileStream]")
     REQUIRE(read_file(base.string() + ".2") == "Z");
     REQUIRE_FALSE(fs::exists(base.string() + ".3"));
 }
+
+TEST_CASE("ChunkedFileStream – overflow reached via single-char writes", "[ChunkedFileBuf]") {
+    // out.put(c) → sputc(c) → overflow(c), exercising the overflow() path.
+    TempDir tmp;
+    const fs::path base = tmp.path / "log";
+
+    {
+        stream_chunk::ChunkedFileStream out(base, 2);
+        out.put('A'); // overflow('A') – no rotation yet
+        out.put('B'); // overflow('B') – fills chunk 0 exactly
+        out.put('C'); // overflow('C') – triggers rotation, then writes to chunk 1
+    }
+
+    REQUIRE(read_file(base.string() + ".0") == "AB");
+    REQUIRE(read_file(base.string() + ".1") == "C");
+}
+
+TEST_CASE("ChunkedFileStream – throws on non-existent parent directory", "[ChunkedFileStream]") {
+    // Exercises the `!file_buf_.open(...)` error branch in rotate().
+    REQUIRE_THROWS_AS(
+        stream_chunk::ChunkedFileStream("/nonexistent_dir_xyz/log", 1024),
+        std::runtime_error);
+}
+
+TEST_CASE("ChunkedFileStream – sync flushes without error", "[ChunkedFileStream]") {
+    // Exercises sync() / pubsync() through the explicit flush() call.
+    TempDir tmp;
+    stream_chunk::ChunkedFileStream out(tmp.path / "log", 1024);
+    out << "flush me";
+    out.flush();
+    REQUIRE(out.good());
+}

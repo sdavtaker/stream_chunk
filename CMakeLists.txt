@@ -37,30 +37,24 @@ include(cmake/coverage.cmake)
 option(ENABLE_CLANG_TIDY "Run clang-tidy on sources during build" OFF)
 
 if(ENABLE_CLANG_TIDY)
-    find_program(CLANG_TIDY_PATH NAMES clang-tidy clang-tidy-17 clang-tidy-18 REQUIRED)
+    find_program(CLANG_TIDY_PATH NAMES clang-tidy clang-tidy-18 clang-tidy-17 REQUIRED)
     set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_PATH}")
     message(STATUS "clang-tidy enabled: ${CLANG_TIDY_PATH}")
 endif()
 
 # ---------------------------------------------------------------------------
-# Library
+# Header-only library
 # ---------------------------------------------------------------------------
-add_library(stream_chunk
-    src/stream_chunk.cpp
-)
+add_library(stream_chunk INTERFACE)
+add_library(stream_chunk::stream_chunk ALIAS stream_chunk)
 
 target_include_directories(stream_chunk
-    PUBLIC
+    INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
 
-target_compile_options(stream_chunk
-    PRIVATE
-        $<$<CXX_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Wpedantic -Werror>
-)
-
-enable_coverage(stream_chunk)
+target_compile_features(stream_chunk INTERFACE cxx_std_23)
 
 # ---------------------------------------------------------------------------
 # Install rules
@@ -68,10 +62,7 @@ enable_coverage(stream_chunk)
 include(GNUInstallDirs)
 
 install(TARGETS stream_chunk
-    EXPORT  stream_chunk_targets
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    EXPORT stream_chunk_targets
 )
 
 install(DIRECTORY include/

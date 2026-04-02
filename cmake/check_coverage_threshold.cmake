@@ -16,7 +16,7 @@ if(NOT DEFINED COVERAGE_INFO OR NOT DEFINED LCOV_PATH OR
 endif()
 
 execute_process(
-    COMMAND ${LCOV_PATH} --summary ${COVERAGE_INFO}
+    COMMAND ${LCOV_PATH} --rc branch_coverage=1 --summary ${COVERAGE_INFO}
     OUTPUT_VARIABLE LCOV_SUMMARY
     ERROR_VARIABLE  LCOV_SUMMARY   # lcov writes the summary to stderr
     RESULT_VARIABLE LCOV_RESULT

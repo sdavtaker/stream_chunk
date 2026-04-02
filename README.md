@@ -1,8 +1,8 @@
 # stream_chunk
 
-ostream that output to multiple files with a incremental suffix in the filename and rolls over at fixed size intervals.
+`ostream` that outputs to multiple files with an incremental suffix in the filename and rolls over at fixed size intervals.
 
-`stream_chunk` is a C++23 library that provides a `std::ostream`-compatible interface
+`stream_chunk` is a **header-only** C++23 library that provides a `std::ostream`-compatible interface
 for writing to a sequence of files. A new file is opened whenever the current file
 reaches a configurable byte-size limit. Files are named `<base_path>.<index>` where
 `<index>` starts at `0` and increments on each rotation.
@@ -96,10 +96,10 @@ The project follows the **LLVM** coding style enforced by `clang-format`:
 
 ```bash
 # Check formatting
-clang-format --dry-run --Werror $(find include src tests -name '*.hpp' -o -name '*.cpp')
+clang-format --dry-run --Werror $(find include tests -name '*.hpp' -o -name '*.cpp')
 
 # Apply formatting
-clang-format -i $(find include src tests -name '*.hpp' -o -name '*.cpp')
+clang-format -i $(find include tests -name '*.hpp' -o -name '*.cpp')
 ```
 
 clang-tidy rules are defined in `.clang-tidy`. Enable during build with
@@ -113,7 +113,6 @@ cmake --install build --prefix /usr/local
 
 This installs:
 - Headers → `<prefix>/include/stream_chunk/`
-- Library → `<prefix>/lib/`
 - CMake package config → `<prefix>/lib/cmake/stream_chunk/`
 
 Downstream projects can then use:
