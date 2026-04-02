@@ -39,3 +39,33 @@
 
 # debug information files
 *.dwo
+
+# CMake build directories
+build/
+out/
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
+_deps/
+
+# Coverage reports
+coverage/
+*.gcov
+*.gcda
+*.gcno
+lcov.info
+
+# vcpkg installed packages (when not using a separate vcpkg root)
+vcpkg_installed/
+
+# IDE / editor artifacts
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+

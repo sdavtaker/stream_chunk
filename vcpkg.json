@@ -1,0 +1,10 @@
+{
+  "name": "stream-chunk",
+  "version": "0.1.0",
+  "description": "C++23 ostream that outputs to multiple files with an incremental suffix and rolls over at fixed size intervals",
+  "homepage": "https://github.com/sdavtaker/stream_chunk",
+  "license": "BSD-2-Clause",
+  "dependencies": [
+    "catch2"
+  ]
+}
